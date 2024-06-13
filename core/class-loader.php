@@ -14,7 +14,8 @@
 namespace WPMUDEV\PluginTest;
 
 use WPMUDEV\PluginTest\Base;
-
+use WPMUDEV\PluginTest\ShortCode;
+use WPMUDEV\PluginTest\Core\Short_Code;
 // If this file is called directly, abort.
 defined( 'WPINC' ) || die;
 
@@ -92,7 +93,20 @@ final class Loader extends Base {
 	 * @return void
 	 */
 	private function init() {
+		// Admin pages
 		App\Admin_Pages\Auth::instance()->init();
+		App\Admin_Pages\PostMaintenance::instance()->init();
+		//Commands
+		App\Commands\Command::instance()->init();
+		//Crons
+		App\Crons\Cron::instance()->init();
+		// Endpoints
 		Endpoints\V1\Auth::instance();
+		Endpoints\V1\Auth_Confirm::instance();
+		Endpoints\V1\Auth_Start::instance();
+		Endpoints\V1\Post::instance();
+		Core\Google_Auth\Auth::instance()->init();
+		// Shortcodes
+		App\ShortCodes\ShortCode::instance()->init();
 	}
 }

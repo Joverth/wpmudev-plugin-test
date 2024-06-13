@@ -19,7 +19,7 @@ defined( 'WPINC' ) || die;
 use WPMUDEV\PluginTest\Base;
 use WPMUDEV\PluginTest\Endpoints\V1\Auth_Confirm;
 
-class Auth extends Base {
+class PostMaintenance extends Base {
 	/**
 	 * The page title.
 	 *
@@ -32,7 +32,7 @@ class Auth extends Base {
 	 *
 	 * @var string
 	 */
-	private $page_slug = 'wpmudev_plugintest_auth';
+	private $page_slug = 'wpmudev_plugintest_post_maintenance';
 
 	/**
 	 * Google auth credentials.
@@ -48,7 +48,7 @@ class Auth extends Base {
 	 *
 	 * @var string
 	 */
-	private $option_name = 'wpmudev_plugin_tests_auth';
+	private $option_name = 'wpmudev_plugintest_post_maintenance';
 
 	/**
 	 * Page Assets.
@@ -79,10 +79,10 @@ class Auth extends Base {
 	 *f
 	 */
 	public function init() {
-		$this->page_title     = __( 'Google Auth', 'wpmudev-plugin-test' );
+		$this->page_title     = __( 'Post Maintenance', 'wpmudev-plugin-test' );
 		$this->creds          = get_option( $this->option_name, array() );
 		$this->assets_version = ! empty( $this->script_data( 'version' ) ) ? $this->script_data( 'version' ) : WPMUDEV_PLUGINTEST_VERSION;
-		$this->unique_id      = "wpmudev_plugintest_auth_main_wrap-{$this->assets_version}";
+		$this->unique_id      = "wpmudev_plugintest_post_maintenance_main_wrap-{$this->assets_version}";
 
 		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -92,12 +92,12 @@ class Auth extends Base {
 
 	public function register_admin_page() {
 		$page = add_menu_page(
-			'Google Auth setup',
+			'Posts Maintenance',
 			$this->page_title,
 			'manage_options',
 			$this->page_slug,
 			array( $this, 'callback' ),
-			'dashicons-google',
+			'dashicons-admin-generic',
 			6
 		);
 
@@ -123,9 +123,9 @@ class Auth extends Base {
 			$this->page_scripts = array();
 		}
 
-		$handle       = 'wpmudev_plugintest_authpage';
-		$src          = WPMUDEV_PLUGINTEST_ASSETS_URL . '/js/authsettingspage.min.js';
-		$style_src    = WPMUDEV_PLUGINTEST_ASSETS_URL . '/css/authsettingspage.min.css';
+		$handle       = 'wpmudev_plugintest_postmaintenancepage';
+		$src          = WPMUDEV_PLUGINTEST_ASSETS_URL . '/js/postmaintenancepage.min.js';
+		$style_src    = WPMUDEV_PLUGINTEST_ASSETS_URL . '/css/postmaintenancepage.min.css';
 		$dependencies = ! empty( $this->script_data( 'dependencies' ) )
 			? $this->script_data( 'dependencies' )
 			: array(
@@ -144,11 +144,7 @@ class Auth extends Base {
 			'strategy'  => true,
 			'localize'  => array(
 				'dom_element_id'   => $this->unique_id,
-				'clientID'         => 'clientID',
-				'clientSecret'     => 'clientSecret',
-				'redirectUrl'      => 'redirectUrl',
-				'restEndpointSave' => 'wpmudev/v1/auth/auth-url',
-				'returnUrl'        => 'wpmudev/v1/auth/confirm',
+				'restEndpointPostScanAll' => 'wpmudev/v1/post/scan_all',
 			),
 		);
 	}
@@ -174,8 +170,8 @@ class Auth extends Base {
 	protected function raw_script_data(): array {
 		static $script_data = null;
 
-		if ( is_null( $script_data ) && file_exists( WPMUDEV_PLUGINTEST_DIR . 'assets/js/authsettingspage.min.asset.php' ) ) {
-			$script_data = include WPMUDEV_PLUGINTEST_DIR . 'assets/js/authsettingspage.min.asset.php';
+		if ( is_null( $script_data ) && file_exists( WPMUDEV_PLUGINTEST_DIR . 'assets/js/postmaintenancepage.min.asset.php' ) ) {
+			$script_data = include WPMUDEV_PLUGINTEST_DIR . 'assets/js/postmaintenancepage.min.asset.php';
 		}
 
 		return (array) $script_data;

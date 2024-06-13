@@ -19,7 +19,6 @@ defined( 'WPINC' ) || die;
 use WPMUDEV\PluginTest\Base;
 use WPMUDEV\PluginTest\Endpoints\V1\Auth_Confirm;
 use Google\Client;
-
 class Auth extends Base {
 	/**
 	 * Google client instance.
@@ -37,6 +36,8 @@ class Auth extends Base {
 	private $redirect_url = '';
 
 	public function init() {
+		$this->client_id = $this->get_client_id();
+		$this->client_secret = $this->get_client_secret();
 	}
 
 	/**
@@ -69,17 +70,18 @@ class Auth extends Base {
 	 *
 	 * @param string $client_id
 	 * @param string $client_secret
+	 * @param string $redirect_uri
 	 *
 	 * @return boolean
 	 */
-	public function set_up( string $client_id = '', string $client_secret = '' ): bool {
+	public function set_up( string $client_id = '', string $client_secret = '', string $redirect_uri = '' ): bool {
 		$client_id     = ! empty( $client_id ) ? $client_id : $this->get_client_id();
+		$client_secret = ! empty( $client_secret ) ? $client_secret : $this->get_client_secret();
 		$client_secret = ! empty( $client_secret ) ? $client_secret : $this->get_client_secret();
 
 		$this->client()->setClientId( $client_id );
 		$this->client()->setClientSecret( $client_secret );
 		// Todo: Set the return url based on new endpoint.
-		//$this->client()->setRedirectUri();
 		$this->client()->addScope( 'profile' );
 		$this->client()->addScope( 'email' );
 
@@ -128,5 +130,9 @@ class Auth extends Base {
 		}
 
 		return $settings;
+	}
+	protected function get_redirect_uri() {
+		$redirect_uri = rest_url('wpmudev/v1/auth/confirm');
+		return $redirect_uri;
 	}
 }

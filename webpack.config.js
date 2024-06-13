@@ -8,6 +8,7 @@ module.exports = {
     ...defaultConfig,
 	entry: {
 		'authsettingspage': './src/googleauth-page/main.jsx',
+		'postmaintenancepage': './src/postmaintenance-page/main.jsx',
 	},
 
 	output: {

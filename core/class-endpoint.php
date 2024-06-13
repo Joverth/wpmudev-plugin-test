@@ -16,7 +16,7 @@ namespace WPMUDEV\PluginTest;
 use WPMUDEV\PluginTest\Base;
 use WP_REST_Response;
 use WP_REST_Controller;
-
+use WP_Error;
 // If this file is called directly, abort.
 defined( 'WPINC' ) || die;
 
@@ -172,4 +172,19 @@ class Endpoint extends WP_REST_Controller {
 	 */
 	public function register_routes() {
 	}
+	public function permissions_check( $request ) {
+        // Check if the user is logged in.
+        if ( !is_user_logged_in() ) {
+			return new WP_Error( 'rest_forbidden', esc_html__( 'You cannot access this endpoint.', 'wpmudev-plugin-test' ), array( 'status' => 401 ) );
+        }
+
+        return true;
+    }
+	// Validation function for postTypes parameter
+    public function validate_field($param, $request, $key) {
+        if (empty($param)) {
+            return new WP_Error('rest_invalid_param', sprintf('%s is required.', $key), array('status' => 400));
+        }
+        return true;
+    }
 }

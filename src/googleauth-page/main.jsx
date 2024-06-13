@@ -1,27 +1,95 @@
-import { createRoot, render, StrictMode, createInterpolateElement } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import { Button, TextControl } from '@wordpress/components';
+import { StrictMode, createInterpolateElement, createRoot, render, useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import Notification from '../notifications/Notification';
 
-import "./scss/style.scss"
+
+import "../scss/style.scss";
+
 
 const domElement = document.getElementById( window.wpmudevPluginTest.dom_element_id );
 
 const WPMUDEV_PluginTest = () => {
+    const [response, setResponse] = useState(null);
+    const [error, setError] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [clientId, setClientId] = useState('');
+    const [clientSecret, setClientSecret] = useState('');
+    const handleRemoveNotification = (index) => {
+        setNotifications(notifications.filter((_, i) => i !== index));
+    };
 
-    const handleClick = () => {
+    const showNotification = (message, status) => {
+        setNotifications([...notifications, { message, status }]);
+    };
+    const txtDomain = 'wpmudev-plugin-test';
+    const fetchDataOnMount = async () => {
+        console.log(wpmudevPluginTest);
+        try {
+            const result = await apiFetch({
+                path: wpmudevPluginTest.restEndpointSave,
+                method: 'GET',
+            });
+
+            if (result.success) {
+                setClientId(result.data.client_id);
+                setClientSecret(result.data.client_secret);
+            } else {
+                showNotification(result.data.message || 'Failed to fetch initial data.', 'error');
+            }
+            console.log(result);
+        } catch (err) {
+            setError(err.message);
+            showNotification(err.message || 'An unknown error occurred while fetching initial data.', 'error');
+        }
+    };
+    useEffect(() => {
+        fetchDataOnMount();
+    }, []); // Empty dependency array to run only once on mount
+    const handleClick = async () => {
+        console.log(wpmudevPluginTest);
+        try {
+            const result = await apiFetch({ 
+                path: wpmudevPluginTest.restEndpointSave,
+                method: 'POST',
+                data: { clientId, clientSecret },
+            });
+            if (result.success) {
+                setResponse(result.data);
+                setError(null);
+                showNotification(result.data.message, 'success');
+            } else {
+                setResponse(result.data);
+                setError(null);
+                showNotification(response.message, 'error');
+            }
+        } catch (err) {
+            setError(err.data);
+            showNotification(err.message, 'error');
+        }
     }
 
     return (
     <>
         <div class="sui-header">
             <h1 class="sui-header-title">
-                Settings
+            { __('Settings', txtDomain) }
             </h1>
       </div>
-
+      <div className="sui-floating-notices">
+                {notifications.map((notification, index) => (
+                    <Notification
+                        key={index}
+                        message={notification.message}
+                        status={notification.status}
+                        onRemove={() => handleRemoveNotification(index)}
+                    />
+                ))}
+            </div>
         <div className="sui-box">
-
             <div className="sui-box-header">
-                <h2 className="sui-box-title">Set Google credentials</h2>
+                <h2 className="sui-box-title">{ __('Set Google credentials', txtDomain) }</h2>
             </div>
 
             <div className="sui-box-body">
@@ -34,7 +102,8 @@ const WPMUDEV_PluginTest = () => {
                             }
                           )}
                         label="Client ID"
-                        onChange={()=>{}}
+                        value={clientId}
+                        onChange={(value) => setClientId(value)}
                     />
                 </div>
 
@@ -46,13 +115,15 @@ const WPMUDEV_PluginTest = () => {
                               a: <a href="https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid"/>,
                             }
                           )}
+                        type="password"
                         label="Client Secret"
-						onChange={()=>{}}
+                        value={clientSecret}
+                        onChange={(value) => setClientSecret(value)}
                     />
                 </div>
 
                 <div className="sui-box-settings-row">
-                    <span>Please use this url <em>{window.wpmudevPluginTest.returnUrl}</em> in your Google API's <strong>Authorized redirect URIs</strong> field</span>
+                    <span>{ __('Please use this url ', txtDomain) }<em>{window.wpmudevPluginTest.returnUrl}</em> { __("in your Google API's ", txtDomain) }<strong>{ __('Authorized redirect URIs ', txtDomain) }</strong> { __('field', txtDomain) }</span>
                 </div>
             </div>
 
@@ -62,14 +133,12 @@ const WPMUDEV_PluginTest = () => {
                         variant="primary"
                         onClick={ handleClick }
                     >
-                        Save
+                        { __('Save ', txtDomain) }
                     </Button>
 
                 </div>
             </div>
-
         </div>
-
     </>
     );
 }
